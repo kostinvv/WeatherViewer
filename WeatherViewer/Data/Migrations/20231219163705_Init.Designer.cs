@@ -12,8 +12,8 @@ using WeatherViewer.Data;
 namespace WeatherViewer.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231217112744_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20231219163705_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -63,12 +63,10 @@ namespace WeatherViewer.Data.Migrations
 
             modelBuilder.Entity("WeatherViewer.Models.Session", b =>
                 {
-                    b.Property<long>("SessionId")
+                    b.Property<Guid>("SessionId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("uuid")
                         .HasColumnName("session_id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("SessionId"));
 
                     b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("timestamp with time zone")

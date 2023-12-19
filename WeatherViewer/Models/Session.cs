@@ -2,7 +2,7 @@
 
 public class Session
 {
-    public long SessionId { get; set; }
+    public Guid SessionId { get; set; }
     
     // foreign key property 
     public long UserId { get; set; }

@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace WeatherViewer.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -53,8 +53,7 @@ namespace WeatherViewer.Data.Migrations
                 name: "sessions",
                 columns: table => new
                 {
-                    session_id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    session_id = table.Column<Guid>(type: "uuid", nullable: false),
                     user_id = table.Column<long>(type: "bigint", nullable: false),
                     expires_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },

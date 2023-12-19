@@ -60,12 +60,10 @@ namespace WeatherViewer.Data.Migrations
 
             modelBuilder.Entity("WeatherViewer.Models.Session", b =>
                 {
-                    b.Property<long>("SessionId")
+                    b.Property<Guid>("SessionId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("uuid")
                         .HasColumnName("session_id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("SessionId"));
 
                     b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("timestamp with time zone")
