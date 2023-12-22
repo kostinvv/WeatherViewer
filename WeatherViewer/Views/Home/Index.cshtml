@@ -1,5 +1,7 @@
-﻿@{
+﻿@model User
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<h1 class="text-center">Hello, World!</h1>
+<h1 class="text-center">Hello, @Model.Login</h1>

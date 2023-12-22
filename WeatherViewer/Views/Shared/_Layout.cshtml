@@ -18,12 +18,23 @@
                         <li class="nav-item">
                             <a class="nav-link active" aria-current="page" asp-controller="home" asp-action="index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="user" asp-action="login">Sign in</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="user" asp-action="registration">Sign up</a>
-                        </li>
+                        @{
+                            if (!Context.Request.Cookies.ContainsKey("SessionId"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="user" asp-action="login">Sign in</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="user" asp-action="register">Sign up</a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="user" asp-action="logout">Log out</a>
+                                </li>
+                            }
+                        }
                     </ul>
                 </div>
             </div>
