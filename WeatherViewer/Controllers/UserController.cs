@@ -43,7 +43,7 @@ public class UserController : Controller
         await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
         
-        return RedirectToAction("Login", "User");
+        return RedirectToAction("login", "user");
     }
 
     [HttpPost]
@@ -79,7 +79,7 @@ public class UserController : Controller
         _context.Sessions.Remove(session);
         await _context.SaveChangesAsync();
 
-        return RedirectToAction("Login", "User");
+        return RedirectToAction("login", "user");
     }
 
     private async Task CreateSessionAsync(User user)

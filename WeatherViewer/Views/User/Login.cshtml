@@ -2,21 +2,37 @@
 
 @{
     Layout = "_Layout";
+    ViewData["Title"] = "Login form";
 }
 
-<form class="row" method="post" asp-action="Login">
-    <h1 class="text-center">Sign in</h1>
-    <div class="col-md-12 mb-3">
-        <label for="username" class="form-label">Username</label>
-        <input type="text" class="form-control" id="username" asp-for="Login">
-        <span asp-validation-for="Login"></span>
+<section class="position-relative py-4 py-xl-5">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-md-8 col-xl-6 text-center mx-auto">
+                <h2>Login form</h2>
+                <p class="w-lg-50">Log in to view and save weather information.</p>
+            </div>
+        </div>
+        <div class="row d-flex justify-content-center">
+            <div class="col-md-6 col-xl-4">
+                <div class="card mb-5">
+                    <div class="card-body d-flex flex-column align-items-center">
+                        @Html.ValidationSummary()
+                        <form class="text-center" method="post" asp-action="login">
+                            <div class="mb-3">
+                                <input asp-for="Login" class="form-control" type="text" name="login" placeholder="Login">
+                            </div>
+                            <div class="mb-3">
+                                <input asp-for="Password" class="form-control" type="password" name="password" placeholder="Password">
+                            </div>
+                            <div class="mb-3">
+                                <button class="btn btn-primary d-block w-100" type="submit">Login</button>
+                            </div>
+                            <p class="text-muted">If you do not have an account, <a asp-controller="user" asp-action="register">sign up</a></p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="col-md-12 mb-3">
-        <label for="InputPassword" class="form-label">Password</label>
-        <input type="password" class="form-control" id="InputPassword" asp-for="Password">
-        <span asp-validation-for="Password"></span>
-    </div>
-    <div class="col-auto">
-        <button type="submit" class="btn btn-primary">Sign in</button>
-    </div>
-</form>
+</section>

@@ -19,7 +19,7 @@ public class HomeController : Controller
     {
         if (!Request.Cookies.ContainsKey("SessionId"))
         {
-            return RedirectToAction("Login", "User");
+            return RedirectToAction("login", "user");
         }
 
         var user = await GetCurrentUser();
