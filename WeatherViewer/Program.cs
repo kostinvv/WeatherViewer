@@ -5,7 +5,10 @@ using WeatherViewer.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+
 builder.Services.AddTransient<AuthService>();
+builder.Services.AddTransient<SessionService>();
+builder.Services.AddHostedService<SessionHostedService>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));

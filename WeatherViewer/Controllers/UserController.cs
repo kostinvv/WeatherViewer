@@ -47,7 +47,11 @@ public class UserController : Controller
         try
         {
             var session = await _authService.AuthAsync(request);
-            Response.Cookies.Append(CookieKey, session.SessionId.ToString());
+            Response.Cookies.Append(CookieKey, session.SessionId.ToString(), new CookieOptions()
+            {
+                MaxAge = TimeSpan.FromSeconds(15),
+            });
+            
             return Redirect("/");
         }
         catch (UserNotFoundException ex)

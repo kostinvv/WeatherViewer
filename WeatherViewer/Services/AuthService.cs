@@ -46,7 +46,7 @@ public class AuthService
         {
             SessionId = new Guid(),
             UserId = user.UserId,
-            ExpiresAt = DateTime.UtcNow.AddDays(30),
+            ExpiresAt = DateTime.UtcNow.AddSeconds(30),
         };
         
         await (_context.Sessions ?? throw new InvalidOperationException()).AddAsync(session);
