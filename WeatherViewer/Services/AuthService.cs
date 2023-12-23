@@ -9,10 +9,12 @@ namespace WeatherViewer.Services;
 public class AuthService
 {
     private readonly ApplicationDbContext _context;
+    private readonly ILogger<AuthService> _logger;
 
-    public AuthService(ApplicationDbContext context)
+    public AuthService(ApplicationDbContext context, ILogger<AuthService> logger)
     {
         _context = context;
+        _logger = logger;
     }
 
     public async Task CreateUserAsync(RegisterRequestDto request)
@@ -22,6 +24,7 @@ public class AuthService
         
         if (foundUser is not null) throw new UserExistsException();
         
+        _logger.LogInformation("Creating user.");
         await _context.Users.AddAsync(new ()
         {
             Login = request.Login,
@@ -29,6 +32,7 @@ public class AuthService
             Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
         });
         await _context.SaveChangesAsync();
+        _logger.LogInformation("User successfully created.");
     }
 
     public async Task<Session> AuthAsync(LoginRequestDto request)
@@ -41,7 +45,7 @@ public class AuthService
         if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
             throw new InvalidPasswordException();
         
-        // create session
+        _logger.LogInformation("Creating session.");
         Session session = new ()
         {
             SessionId = new Guid(),
@@ -62,6 +66,7 @@ public class AuthService
 
         if (session is null) throw new SessionNotFoundException();
         
+        _logger.LogInformation("Session deletion.");
         _context.Sessions.Remove(session);
         await _context.SaveChangesAsync();
     }
