@@ -10,10 +10,12 @@ public class UserController : Controller
     private const string CookieKey = "SessionId";
     
     private readonly AuthService _authService;
+    private readonly IConfiguration _config;
 
-    public UserController(AuthService authService)
+    public UserController(AuthService authService, IConfiguration config)
     {
         _authService = authService;
+        _config = config;
     }
 
     [HttpGet]
@@ -47,9 +49,10 @@ public class UserController : Controller
         try
         {
             var session = await _authService.AuthAsync(request);
+            var minutes = int.Parse(_config["MaxAge"] ?? throw new InvalidOperationException());
             Response.Cookies.Append(CookieKey, session.SessionId.ToString(), new CookieOptions()
             {
-                MaxAge = TimeSpan.FromSeconds(15),
+                MaxAge = TimeSpan.FromMinutes(minutes),
             });
             
             return Redirect("/");

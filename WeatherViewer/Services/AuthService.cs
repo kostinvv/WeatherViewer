@@ -10,11 +10,16 @@ public class AuthService
 {
     private readonly ApplicationDbContext _context;
     private readonly ILogger<AuthService> _logger;
+    private readonly IConfiguration _config;
 
-    public AuthService(ApplicationDbContext context, ILogger<AuthService> logger)
+    public AuthService(
+        ApplicationDbContext context, 
+        ILogger<AuthService> logger, 
+        IConfiguration config)
     {
         _context = context;
         _logger = logger;
+        _config = config;
     }
 
     public async Task CreateUserAsync(RegisterRequestDto request)
@@ -44,13 +49,15 @@ public class AuthService
 
         if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
             throw new InvalidPasswordException();
+
+        var minutes = int.Parse(_config["MaxAge"] ?? throw new InvalidOperationException());
         
         _logger.LogInformation("Creating session.");
         Session session = new ()
         {
             SessionId = new Guid(),
             UserId = user.UserId,
-            ExpiresAt = DateTime.UtcNow.AddSeconds(30),
+            ExpiresAt = DateTime.UtcNow.AddMinutes(minutes),
         };
         
         await (_context.Sessions ?? throw new InvalidOperationException()).AddAsync(session);

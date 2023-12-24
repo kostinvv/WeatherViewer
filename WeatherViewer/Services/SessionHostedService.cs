@@ -4,11 +4,16 @@ public class SessionHostedService : BackgroundService
 {
     private readonly SessionService _sessionService;
     private readonly ILogger<SessionHostedService> _logger;
+    private readonly IConfiguration _config;
 
-    public SessionHostedService(SessionService sessionService, ILogger<SessionHostedService> logger)
+    public SessionHostedService(
+        SessionService sessionService, 
+        ILogger<SessionHostedService> logger, 
+        IConfiguration config)
     {
         _sessionService = sessionService;
         _logger = logger;
+        _config = config;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -17,8 +22,9 @@ public class SessionHostedService : BackgroundService
         {
             _logger.LogInformation("Deleting expired sessions.");
             await _sessionService.DeleteExpiredSessions();
-
-            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+            
+            var minutes = int.Parse(_config["MaxAge"] ?? throw new InvalidOperationException());
+            await Task.Delay(TimeSpan.FromMinutes(minutes), stoppingToken);
         }
     }
 }
