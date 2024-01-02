@@ -18,7 +18,7 @@
                 <div class="card mb-5">
                     <div class="card-body d-flex flex-column align-items-center">
                         @Html.ValidationSummary()
-                        <form class="text-center" method="post" asp-action="register">
+                        <form class="text-center" method="post" asp-action="Register" asp-controller="User">
                             <div class="mb-3">
                                 <input asp-for="Login" class="form-control" type="text" name="login" placeholder="Login">
                             </div>
@@ -29,7 +29,7 @@
                                 <input asp-for="Password" class="form-control" type="password" name="password" placeholder="Password">
                             </div>
                             <div class="mb-3">
-                                <button class="btn btn-primary d-block w-100" type="submit">Login</button>
+                                <button class="btn btn-primary d-block w-100" type="submit">Register</button>
                             </div>
                             <p class="text-muted">If you already have an account, <a asp-controller="user" asp-action="login">log in</a></p>
                         </form>

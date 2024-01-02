@@ -23,7 +23,7 @@ public class SessionHostedService : BackgroundService
             _logger.LogInformation("Deleting expired sessions.");
             await _sessionService.DeleteExpiredSessions();
             
-            var minutes = int.Parse(_config["MaxAge"] ?? throw new InvalidOperationException());
+            var minutes = double.Parse(_config["MaxAge"] ?? throw new InvalidOperationException());
             await Task.Delay(TimeSpan.FromMinutes(minutes), stoppingToken);
         }
     }

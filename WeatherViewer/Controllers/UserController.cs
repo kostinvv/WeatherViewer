@@ -9,10 +9,10 @@ public class UserController : Controller
 {
     private const string CookieKey = "SessionId";
     
-    private readonly AuthService _authService;
+    private readonly IAuthService _authService;
     private readonly IConfiguration _config;
 
-    public UserController(AuthService authService, IConfiguration config)
+    public UserController(IAuthService authService, IConfiguration config)
     {
         _authService = authService;
         _config = config;
@@ -25,15 +25,14 @@ public class UserController : Controller
     public IActionResult Register() => View();
 
     [HttpPost]
-    public async Task<IActionResult> RegisterAsync(RegisterRequestDto request)
+    public async Task<IActionResult> RegisterAsync([FromForm]RegisterRequestDto request)
     {
-        if (!ModelState.IsValid) return View();
-
         try
         {
-            await _authService.CreateUserAsync(request);
+            if (!ModelState.IsValid) return View();
             
-            return RedirectToAction("login", "user");
+            await _authService.CreateUserAsync(request);
+            return RedirectToAction("Login");
         }
         catch (UserExistsException ex)
         {
@@ -49,7 +48,7 @@ public class UserController : Controller
         try
         {
             var session = await _authService.AuthAsync(request);
-            var minutes = int.Parse(_config["MaxAge"] ?? throw new InvalidOperationException());
+            var minutes = double.Parse(_config["MaxAge"] ?? throw new InvalidOperationException());
             Response.Cookies.Append(CookieKey, session.SessionId.ToString(), new CookieOptions()
             {
                 MaxAge = TimeSpan.FromMinutes(minutes),

@@ -6,7 +6,7 @@ using WeatherViewer.Models;
 
 namespace WeatherViewer.Services;
 
-public class AuthService
+public class AuthService : IAuthService
 {
     private readonly ApplicationDbContext _context;
     private readonly ILogger<AuthService> _logger;
@@ -30,7 +30,7 @@ public class AuthService
         if (foundUser is not null) throw new UserExistsException();
         
         _logger.LogInformation("Creating user.");
-        await _context.Users.AddAsync(new ()
+        await _context.Users.AddAsync(new User
         {
             Login = request.Login,
             Email = request.Email,
@@ -50,7 +50,7 @@ public class AuthService
         if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
             throw new InvalidPasswordException();
 
-        var minutes = int.Parse(_config["MaxAge"] ?? throw new InvalidOperationException());
+        var minutes = double.Parse(_config["MaxAge"] ?? throw new InvalidOperationException());
         
         _logger.LogInformation("Creating session.");
         Session session = new ()
