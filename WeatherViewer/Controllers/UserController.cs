@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WeatherViewer.DTOs;
-using WeatherViewer.Exceptions;
+using WeatherViewer.DTOs.Auth;
+using WeatherViewer.Exceptions.Auth;
 using WeatherViewer.Services;
 
 namespace WeatherViewer.Controllers;
@@ -47,12 +47,16 @@ public class UserController : Controller
     {
         try
         {
+            if (!ModelState.IsValid) return View();
+            
+            var login = request.Login;
             var session = await _authService.AuthAsync(request);
             var minutes = double.Parse(_config["MaxAge"] ?? throw new InvalidOperationException());
             Response.Cookies.Append(CookieKey, session.SessionId.ToString(), new CookieOptions()
             {
                 MaxAge = TimeSpan.FromMinutes(minutes),
             });
+            Response.Cookies.Append("weather_login", login);
             
             return Redirect("/");
         }
@@ -77,6 +81,8 @@ public class UserController : Controller
                 .FirstOrDefault(cookie => cookie.Key == CookieKey).Value;
 
             if (sessionId is null) return RedirectToAction("login", "user");
+            
+            Response.Cookies.Delete("weather_login");
             
             Response.Cookies.Delete(CookieKey);
             await _authService.DeleteSessionAsync(sessionId);

@@ -1,4 +1,4 @@
-﻿using WeatherViewer.DTOs;
+﻿using WeatherViewer.DTOs.Auth;
 using WeatherViewer.Models;
 
 namespace WeatherViewer.Services;

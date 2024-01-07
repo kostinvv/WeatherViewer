@@ -1,7 +1,51 @@
-﻿@model User
+﻿@model Dictionary<long, WeatherViewer.DTOs.WeatherDto>
 
 @{
+    Layout = "_Layout";
     ViewData["Title"] = "Home page";
 }
 
-<h1 class="text-center">Hello, @Model.Login</h1>
+@await Html.PartialAsync("LocationForm")
+
+<div class="container py-2">
+    <div class="row mb-5">
+        <div class="col-md-8 col-xl-6 text-center mx-auto">
+            <h2>Tracked locations</h2>
+            <a asp-controller="Home" asp-action="DeleteAllLocation" 
+               class="link-danger" type="button">Remove all</a>
+        </div>
+    </div>
+    @if (@Model.Count > 0)
+    {
+        <div class="row gy-4 row-cols-1 row-cols-md-2 row-cols-xl-3">
+            @foreach (var location in Model)
+            {
+                var id = location.Key;
+                var name = location.Value.Name;
+                var temp = location.Value.Main.Temp;
+                var feelsLike = location.Value.Main.FeelsLike;
+                var description = location.Value.Weather[0].Description;
+                
+                <div class="col">
+                    <div class="card">
+                        <div class="card-body p-4">
+                            <h4 class="card-title">🏙 @name</h4>
+                            <p class="card-text">🌡@temp°C</p>
+                            <p class="card-text">Feels like @feelsLike°C @description</p>
+                            <a class="btn btn-primary" type="button">Forecast</a>
+                            <a asp-controller="Home" asp-action="DeleteLocation" asp-route-locationId="@id" 
+                                class="btn btn-outline-danger" 
+                                type="submit">Remove</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center">
+            <p>No trackable locations</p>
+        </div>
+    }
+</div>

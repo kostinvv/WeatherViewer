@@ -1,0 +1,37 @@
+﻿@model IEnumerable<WeatherViewer.DTOs.FoundLocationDto>
+
+@{
+    ViewBag.Title = "Locations";
+    Layout = "_Layout";
+}
+
+@await Html.PartialAsync("LocationForm")
+
+<div class="container py-2">
+    <div class="row mb-5">
+        <div class="col-md-8 col-xl-6 text-center mx-auto">
+            <h2>Search results: @ViewData["LocationName"]</h2>
+        </div>
+    </div>
+    <div class="row gy-4 row-cols-1 row-cols-md-2 row-cols-xl-3">
+        @foreach (var fl in Model)
+        {
+            var lat = Math.Round(fl.Latitude, 4);
+            var lon = Math.Round(fl.Longitude, 4);
+            <div class="col">
+                <div class="card">
+                    <div class="card-body p-4">
+                        <h4 class="card-title">🏙 @fl.Name, @fl.Country</h4>
+                        <p class="card-text">@lat, @lon</p>
+                        <form asp-action="AddLocation" asp-controller="Home" method="post">
+                            <input type="hidden" name="Name" value="@fl.Name" />
+                            <input type="hidden" name="Lat" value="@fl.Latitude" />
+                            <input type="hidden" name="Lon" value="@fl.Longitude" />
+                            <button type="submit" class="btn btn-primary">Track</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

@@ -1,4 +1,4 @@
-﻿namespace WeatherViewer.DTOs;
+﻿namespace WeatherViewer.DTOs.Auth;
 
 public record LoginRequestDto
 {

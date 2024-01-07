@@ -1,4 +1,10 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var isLoggedIn = Context.Request.Cookies.ContainsKey("SessionId");
+    var userName = Context.Request.Cookies.FirstOrDefault(cookie 
+        => cookie.Key == "weather_login").Value ?? "";
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -17,12 +23,15 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navcol-3">
-            <ul class="navbar-nav mx-auto">
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="home" asp-action="index">Home</a>
-                </li>
+            <ul class="navbar-nav me-auto">
+                @if (isLoggedIn)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link active border-bottom border-2">Hello, @userName</a>
+                    </li>
+                }
                 @{
-                    if (!Context.Request.Cookies.ContainsKey("SessionId"))
+                    if (!isLoggedIn)
                     {
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="user" asp-action="login">Log in</a>
@@ -33,6 +42,9 @@
                     }
                     else
                     {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="home" asp-action="index">Home</a>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="user" asp-action="logout">Log out</a>
                         </li>

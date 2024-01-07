@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using WeatherViewer.Data;
-using WeatherViewer.DTOs;
-using WeatherViewer.Exceptions;
+using WeatherViewer.DTOs.Auth;
+using WeatherViewer.Exceptions.Auth;
 using WeatherViewer.Models;
 using WeatherViewer.Services;
 using Xunit;

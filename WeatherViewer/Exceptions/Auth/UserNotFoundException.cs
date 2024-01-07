@@ -1,4 +1,4 @@
-﻿namespace WeatherViewer.Exceptions;
+﻿namespace WeatherViewer.Exceptions.Auth;
 
 public class UserNotFoundException : Exception
 {
