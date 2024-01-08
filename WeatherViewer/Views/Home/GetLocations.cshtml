@@ -13,25 +13,35 @@
             <h2>Search results: @ViewData["LocationName"]</h2>
         </div>
     </div>
-    <div class="row gy-4 row-cols-1 row-cols-md-2 row-cols-xl-3">
-        @foreach (var fl in Model)
-        {
-            var lat = Math.Round(fl.Latitude, 4);
-            var lon = Math.Round(fl.Longitude, 4);
-            <div class="col">
-                <div class="card">
-                    <div class="card-body p-4">
-                        <h4 class="card-title">🏙 @fl.Name, @fl.Country</h4>
-                        <p class="card-text">@lat, @lon</p>
-                        <form asp-action="AddLocation" asp-controller="Home" method="post">
-                            <input type="hidden" name="Name" value="@fl.Name" />
-                            <input type="hidden" name="Lat" value="@fl.Latitude" />
-                            <input type="hidden" name="Lon" value="@fl.Longitude" />
-                            <button type="submit" class="btn btn-primary">Track</button>
-                        </form>
-                    </div>
+    <div class="row justify-content-center">
+        <div class="col-10 col-md-8 col-lg-6">
+            @foreach (var fl in Model)
+            {
+                var lat = Math.Round(fl.Latitude, 4);
+                var lon = Math.Round(fl.Longitude, 4);
+                var country = $"https://flagsapi.com/{fl.Country}/flat/64.png";
+
+                <div class="mb-2">
+                    <form asp-action="AddLocation" asp-controller="Home" method="post">
+                        <button class="btn location-btn" type="submit" style="width: 100%; text-align: left;">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <h4 class="location-h">
+                                        @fl.Name, @fl.Country
+                                        <img class="text-primary" width="20px" height="20px" src="@country" alt="">
+                                    </h4>
+                                </div>
+                                <div class="d-flex flex-column align-self-center">
+                                    @lat, @lon
+                                </div>
+                            </div>
+                            <input type="hidden" name="Name" value="@fl.Name"/>
+                            <input type="hidden" name="Lat" value="@fl.Latitude"/>
+                            <input type="hidden" name="Lon" value="@fl.Longitude"/>
+                        </button>
+                    </form>
                 </div>
-            </div>
-        }
+            }
+        </div>
     </div>
 </div>

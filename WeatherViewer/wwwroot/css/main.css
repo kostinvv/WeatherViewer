@@ -1,0 +1,17 @@
+﻿p {
+    margin-bottom: 8px;
+}
+
+.location-btn {
+    border: 1px solid #ccc;
+    transition: border-color 0.3s ease;
+}
+
+.location-btn:hover {
+    background-color: #f0f0f0;
+    border-color: #999999;
+}
+
+.location-h {
+    margin: 8px;
+}
