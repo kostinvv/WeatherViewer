@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WeatherViewer.Data;
 using WeatherViewer.DTOs;
+using WeatherViewer.DTOs.Api;
 using WeatherViewer.Exceptions;
+using WeatherViewer.Exceptions.Auth;
 using WeatherViewer.Models;
 
 namespace WeatherViewer.Services;
@@ -132,5 +134,70 @@ public class WeatherService : IWeatherService
             .ToListAsync();
         _context.Locations.RemoveRange(locations);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<IEnumerable<ForecastDto>> GetWeatherForecasts(long locationId, long userId)
+    {
+        var response = await GetWeatherForecastAsync(locationId, userId);
+        var forecast = response.List.Select(value => new ForecastDto
+            {
+                Icon = value.Weather[0].Icon,
+                Description = value.Weather[0].Description,
+                Temp = value.Main.Temp,
+                Month = value.DtTxt.ToString("dd MMM, h:mm tt"),
+            })
+            .ToList();
+        return forecast;
+    }
+
+    private IEnumerable<ForecastDto> GetHourlyForecast(ApiForecastResponse response)
+    {
+        var forecast = response.List.Select(value => new ForecastDto
+            {
+                Icon = value.Weather[0].Icon,
+                Description = value.Weather[0].Description,
+                Temp = value.Main.Temp,
+                Month = value.DtTxt.ToString("dd MMM, h:mm tt"),
+            })
+            .ToList();
+        return forecast;
+    }
+    
+    private async Task<ApiForecastResponse> GetWeatherForecastAsync(long locationId, long userId)
+    {
+        try
+        {
+            var location = await (_context.Locations ?? throw new InvalidOperationException())
+                .FirstOrDefaultAsync(location => location.LocationId == locationId && location.UserId == userId);
+            
+            if (location is null) throw new UserNotFoundException();
+            
+            var lon = location.Longitude;
+            var lat = location.Latitude;
+            var apiKey = _config["Weather:ServiceApiKey"];
+            
+            var uriBuilder = new UriBuilder
+            {
+                Scheme = "http",
+                Host = Host,
+                Path = "data/2.5/forecast",
+                Query = $"lat={lat}&lon={lon}&appid={apiKey}&units=metric",
+            };
+            var requestUri = uriBuilder.Uri;
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            var httpClient = _httpClientFactory.CreateClient();
+            var response = await httpClient.SendAsync(request);
+            
+            var jsonString = await response.Content.ReadAsStringAsync();
+            var forecast = Newtonsoft.Json.JsonConvert
+                .DeserializeObject<ApiForecastResponse>(jsonString);
+            
+            return forecast;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            throw new OpenWeatherApiException();
+        }
     }
 }

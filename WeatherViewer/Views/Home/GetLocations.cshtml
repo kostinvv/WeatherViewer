@@ -14,7 +14,7 @@
         </div>
     </div>
     <div class="row justify-content-center">
-        <div class="col-10 col-md-8 col-lg-6">
+        <div class="col-12 col-md-10 col-lg-6">
             @foreach (var fl in Model)
             {
                 var lat = Math.Round(fl.Latitude, 4);
@@ -26,13 +26,13 @@
                         <button class="btn location-btn" type="submit" style="width: 100%; text-align: left;">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div>
-                                    <h4 class="location-h">
+                                    <h6 class="location-h">
                                         @fl.Name, @fl.Country
                                         <img class="text-primary" width="20px" height="20px" src="@country" alt="">
-                                    </h4>
+                                    </h6>
                                 </div>
                                 <div class="d-flex flex-column align-self-center">
-                                    @lat, @lon
+                                    <span class="small-gray-text">@lat, @lon</span>
                                 </div>
                             </div>
                             <input type="hidden" name="Name" value="@fl.Name"/>

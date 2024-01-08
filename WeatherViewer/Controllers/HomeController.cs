@@ -24,18 +24,18 @@ public class HomeController : Controller
         if (!Request.Cookies.ContainsKey("SessionId"))
             return RedirectToAction("login", "user");
         
-        return View(await CreateWeatherDictionary());
+        return View(await CreateWeatherDictionaryAsync());
     }
 
-    [HttpGet("delete")]
-    public async Task<IActionResult> DeleteLocation(long locationId)
+    [HttpGet("delete/{locationId:long}")]
+    public async Task<IActionResult> DeleteLocationAsync(long locationId)
     {
         if (!Request.Cookies.ContainsKey("SessionId"))
             return RedirectToAction("login", "user");
         
         try
         {
-            var userId = await GetUserId();
+            var userId = await GetUserIdAsync();
             await _service.DeleteLocationAsync(locationId, userId);
         }
         catch (DeleteLocationException ex)
@@ -46,12 +46,12 @@ public class HomeController : Controller
     }
     
     [HttpGet("delete_all")]
-    public async Task<IActionResult> DeleteAllLocation()
+    public async Task<IActionResult> DeleteAllLocationAsync()
     {
         if (!Request.Cookies.ContainsKey("SessionId"))
             return RedirectToAction("login", "user");
         
-        var userId = await GetUserId();
+        var userId = await GetUserIdAsync();
         await _service.DeleteAllLocationsAsync(userId);
         
         return RedirectToAction("index", "home");
@@ -77,10 +77,22 @@ public class HomeController : Controller
         if (!Request.Cookies.ContainsKey("SessionId"))
             return RedirectToAction("login", "user");
         
-        var userId = await GetUserId();
+        var userId = await GetUserIdAsync();
         await _service.AddLocationAsync(request, userId);
         
         return RedirectToAction("index", "home");
+    }
+
+    [HttpGet("forecast/{id:long}")]
+    public async Task<IActionResult> GetForecastAsync(long id)
+    {
+        if (!Request.Cookies.ContainsKey("SessionId"))
+            return RedirectToAction("login", "user");
+        
+        var userId = await GetUserIdAsync();
+        var forecast = await _service.GetWeatherForecasts(locationId:id, userId);
+        
+        return View(forecast);
     }
 
     public IActionResult LocationForm()
@@ -88,7 +100,7 @@ public class HomeController : Controller
         return PartialView();
     }
 
-    private async Task<long> GetUserId()
+    private async Task<long> GetUserIdAsync()
     {
         // get session id from cookie
         var sessionId = Guid.Parse(
@@ -106,11 +118,11 @@ public class HomeController : Controller
         return userId;
     }
     
-    private async Task<Dictionary<long, WeatherDto>> CreateWeatherDictionary()
+    private async Task<Dictionary<long, WeatherDto>> CreateWeatherDictionaryAsync()
     {
         var weather = new Dictionary<long, WeatherDto>();
         
-        var userId = await GetUserId();
+        var userId = await GetUserIdAsync();
         // get user locations
         var locations = await _service.GetLocationsAsync(userId);
 

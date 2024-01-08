@@ -9,9 +9,14 @@
 
 .location-btn:hover {
     background-color: #f0f0f0;
-    border-color: #999999;
+    border-color: #666;
 }
 
 .location-h {
     margin: 8px;
+}
+
+.small-gray-text {
+    font-size: small;
+    color: #b6b6b6;
 }
