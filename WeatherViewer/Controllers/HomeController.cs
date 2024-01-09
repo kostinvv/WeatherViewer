@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WeatherViewer.Data;
-using WeatherViewer.DTOs;
-using WeatherViewer.Exceptions;
-using WeatherViewer.Services;
+using WeatherViewer.Models.DTOs;
+using WeatherViewer.Services.Interfaces;
 
 namespace WeatherViewer.Controllers;
 
@@ -23,8 +22,26 @@ public class HomeController : Controller
     {
         if (!Request.Cookies.ContainsKey("SessionId"))
             return RedirectToAction("login", "user");
+
+        var userId = await GetUserIdAsync();
+        var weather = await _service.GetWeatherAsync(userId);
         
-        return View(await CreateWeatherDictionaryAsync());
+        return View(weather);
+    }
+    
+    [HttpPost("locations")]
+    public async Task<IActionResult> GetLocationsAsync([FromForm] string name)
+    {
+        if (!Request.Cookies.ContainsKey("SessionId"))
+            return RedirectToAction("login", "user");
+        
+        if (!ModelState.IsValid)
+            return RedirectToAction("index", "home");
+        
+        ViewData["LocationName"] = name;
+        
+        var foundLocations = await _service.SearchLocationsAsync(name);
+        return View(foundLocations);
     }
 
     [HttpGet("delete/{locationId:long}")]
@@ -33,14 +50,8 @@ public class HomeController : Controller
         if (!Request.Cookies.ContainsKey("SessionId"))
             return RedirectToAction("login", "user");
         
-        try
-        {
-            var userId = await GetUserIdAsync();
-            await _service.DeleteLocationAsync(locationId, userId);
-        }
-        catch (DeleteLocationException ex)
-        {
-        }
+        var userId = await GetUserIdAsync();
+        await _service.DeleteLocationAsync(locationId, userId);
         
         return RedirectToAction("index", "home");
     }
@@ -56,23 +67,9 @@ public class HomeController : Controller
         
         return RedirectToAction("index", "home");
     }
-    
-    [HttpPost("locations")]
-    public async Task<IActionResult> GetLocationsAsync([FromForm] string name)
-    {
-        if (!Request.Cookies.ContainsKey("SessionId"))
-            return RedirectToAction("login", "user");
-
-        if (name is "") RedirectToAction("index", "home");
-
-        ViewData["LocationName"] = name;
-        var foundLocations = await _service.SearchLocationsAsync(name);
-
-        return View(foundLocations);
-    }
 
     [HttpPost]
-    public async Task<IActionResult> AddLocationAsync([FromForm] LocationRequestDto request)
+    public async Task<IActionResult> AddLocationAsync([FromForm] LocationDto request)
     {
         if (!Request.Cookies.ContainsKey("SessionId"))
             return RedirectToAction("login", "user");
@@ -90,7 +87,7 @@ public class HomeController : Controller
             return RedirectToAction("login", "user");
         
         var userId = await GetUserIdAsync();
-        var forecast = await _service.GetWeatherForecasts(locationId:id, userId);
+        var forecast = await _service.GetWeatherForecastsAsync(locationId:id, userId);
         
         return View(forecast);
     }
@@ -121,21 +118,5 @@ public class HomeController : Controller
             .FirstAsync();
 
         return userId;
-    }
-    
-    private async Task<Dictionary<long, WeatherDto>> CreateWeatherDictionaryAsync()
-    {
-        var weather = new Dictionary<long, WeatherDto>();
-        
-        var userId = await GetUserIdAsync();
-        // get user locations
-        var locations = await _service.GetLocationsAsync(userId);
-
-        foreach (var location in locations)
-        {
-            var response = await _service.GetWeatherForLocationAsync(location);
-            weather.Add(location.LocationId, response);
-        }
-        return weather;
     }
 }

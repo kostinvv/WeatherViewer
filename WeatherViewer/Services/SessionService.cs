@@ -15,11 +15,11 @@ public class SessionService
     public async Task DeleteExpiredSessions()
     {
         using var scope = _serviceScopeFactory.CreateScope();
-        
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             
         var expiredSessions = await (dbContext.Sessions ?? throw new InvalidOperationException())
-            .Where(session => session.ExpiresAt < DateTime.UtcNow).ToListAsync();
+            .Where(session => session.ExpiresAt < DateTime.UtcNow)
+            .ToListAsync();
             
         foreach (var session in expiredSessions)
             dbContext.Sessions.Remove(session);

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WeatherViewer.DTOs.Auth;
 using WeatherViewer.Exceptions.Auth;
-using WeatherViewer.Services;
+using WeatherViewer.Models.DTOs.Auth;
+using WeatherViewer.Services.Interfaces;
 
 namespace WeatherViewer.Controllers;
 
@@ -37,7 +37,6 @@ public class UserController : Controller
         catch (UserExistsException ex)
         {
             ModelState.AddModelError(string.Empty, ex.Message);
-            
             return View();
         }
     }
@@ -63,13 +62,12 @@ public class UserController : Controller
         catch (UserNotFoundException ex)
         {
             ModelState.AddModelError(string.Empty, ex.Message);
-            return View();
         }
         catch (InvalidPasswordException ex)
         {
             ModelState.AddModelError(string.Empty, ex.Message);
-            return View();
         }
+        return View();
     }
 
     [HttpGet]
@@ -77,21 +75,15 @@ public class UserController : Controller
     {
         try
         {
-            var sessionId = Request.Cookies
-                .FirstOrDefault(cookie => cookie.Key == CookieKey).Value;
-
-            if (sessionId is null) return RedirectToAction("login", "user");
+            if (!Request.Cookies.TryGetValue(CookieKey, out var sessionId))
+                return RedirectToAction("login", "user");
             
             Response.Cookies.Delete("weather_login");
-            
             Response.Cookies.Delete(CookieKey);
             await _authService.DeleteSessionAsync(sessionId);
-            
-            return RedirectToAction("login", "user");
         }
-        catch (SessionNotFoundException)
-        {
-            return RedirectToAction("login", "user");
-        }
+        catch (SessionNotFoundException) { }
+        
+        return RedirectToAction("login", "user");
     }
 }

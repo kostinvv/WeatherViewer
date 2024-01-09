@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WeatherViewer.Data;
 using WeatherViewer.Services;
+using WeatherViewer.Services.Interfaces;
 
-namespace WeatherViewer.Startup;
+namespace WeatherViewer;
 
 public static class DependencyInjection
 {

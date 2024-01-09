@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WeatherViewer.Data;
-using WeatherViewer.DTOs.Auth;
 using WeatherViewer.Exceptions.Auth;
 using WeatherViewer.Models;
+using WeatherViewer.Models.DTOs.Auth;
+using WeatherViewer.Services.Interfaces;
 
 namespace WeatherViewer.Services;
 

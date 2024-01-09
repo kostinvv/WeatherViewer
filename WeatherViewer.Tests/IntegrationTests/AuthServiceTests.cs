@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using WeatherViewer.Data;
-using WeatherViewer.DTOs.Auth;
 using WeatherViewer.Exceptions.Auth;
 using WeatherViewer.Models;
-using WeatherViewer.Services;
+using WeatherViewer.Models.DTOs.Auth;
+using WeatherViewer.Services.Interfaces;
 using Xunit;
 
 namespace WeatherViewer.Tests.IntegrationTests;

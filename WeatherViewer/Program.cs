@@ -1,5 +1,3 @@
-using WeatherViewer.Startup;
-
 namespace WeatherViewer;
 
 public class Program

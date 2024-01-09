@@ -1,6 +1,6 @@
-﻿namespace WeatherViewer.DTOs;
+﻿namespace WeatherViewer.Models.DTOs;
 
-public record LocationRequestDto
+public class LocationDto
 {
     public required string Name { get; init; }
     public required double Lat { get; init; }

@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 
-namespace WeatherViewer.DTOs;
+namespace WeatherViewer.Models.API;
 
-public record FoundLocationDto
+public record ApiLocationResponse
 {
     [JsonProperty(PropertyName = "name")]
     public required string Name { get; init; }

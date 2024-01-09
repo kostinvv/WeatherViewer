@@ -1,14 +1,8 @@
 ﻿using Newtonsoft.Json;
 
-namespace WeatherViewer.DTOs.Api;
+namespace WeatherViewer.Models.API.Common;
 
-public record ApiForecastResponse
-{
-    [JsonProperty(PropertyName = "list")]
-    public List<WeatherList> List { get; init; }
-}
-
-public class WeatherList
+public class Forecast
 {
     [JsonProperty(PropertyName = "main")]
     public Main Main { get; set; }
