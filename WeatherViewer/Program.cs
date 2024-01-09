@@ -1,6 +1,4 @@
-using Microsoft.EntityFrameworkCore;
-using WeatherViewer.Data;
-using WeatherViewer.Services;
+using WeatherViewer.Startup;
 
 namespace WeatherViewer;
 
@@ -9,27 +7,23 @@ public class Program
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-
-        builder.Services.AddControllersWithViews();
-        builder.Services.AddHttpClient();
-        builder.Services.AddTransient<IAuthService, AuthService>();
-        builder.Services.AddTransient<IWeatherService, WeatherService>();
-        builder.Services.AddTransient<SessionService>();
-        builder.Services.AddHostedService<SessionHostedService>();
-
-        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-        builder.Services.AddDbContext<ApplicationDbContext>(options 
-            => options.UseNpgsql(connectionString));
-
+        
+        builder.Services.RegisterServices();
+        builder.Services.AddDatabase(configuration: builder.Configuration);
+        
         var app = builder.Build();
 
-        // add middleware
+        if (!app.Environment.IsDevelopment())
+        {
+            app.UseExceptionHandler("/Home/Error");
+        }
+        
         app.UseStaticFiles();
-
+        
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}");
-
+        
         app.Run();
     }
 }

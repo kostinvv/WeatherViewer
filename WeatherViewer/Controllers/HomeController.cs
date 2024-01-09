@@ -100,6 +100,11 @@ public class HomeController : Controller
         return PartialView();
     }
 
+    public IActionResult Error()
+    {
+        return View();
+    }
+
     private async Task<long> GetUserIdAsync()
     {
         // get session id from cookie
