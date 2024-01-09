@@ -32,5 +32,11 @@ public static class DependencyInjection
         services.AddDbContext<ApplicationDbContext>(optionsAction: options 
             => options.UseNpgsql(
                 connectionString: configuration.GetConnectionString("DefaultConnection")));
+
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = configuration.GetConnectionString("Redis");
+            options.InstanceName = "WeatherViewer_";
+        });
     }
 }
