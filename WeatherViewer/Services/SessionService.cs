@@ -15,15 +15,9 @@ public class SessionService
     public async Task DeleteExpiredSessions()
     {
         using var scope = _serviceScopeFactory.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            
-        var expiredSessions = await (dbContext.Sessions ?? throw new InvalidOperationException())
-            .Where(session => session.ExpiresAt < DateTime.UtcNow)
-            .ToListAsync();
-            
-        foreach (var session in expiredSessions)
-            dbContext.Sessions.Remove(session);
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         
-        await dbContext.SaveChangesAsync();
+        await context.Database
+            .ExecuteSqlRawAsync("DELETE FROM sessions WHERE expires_at < CURRENT_TIMESTAMP");
     }
 }

@@ -25,7 +25,7 @@ public class AuthService : IAuthService
 
     public async Task CreateUserAsync(RegisterRequestDto request)
     {
-        var foundUser = await (_context.Users ?? throw new InvalidOperationException())
+        var foundUser = await _context.Users
             .FirstOrDefaultAsync(user => user.Login == request.Login);
         
         if (foundUser is not null) throw new UserExistsException();
@@ -43,7 +43,7 @@ public class AuthService : IAuthService
 
     public async Task<Session> AuthAsync(LoginRequestDto request)
     {
-        var user = await (_context.Users ?? throw new InvalidOperationException())
+        var user = await _context.Users
             .FirstOrDefaultAsync(user => user.Login == request.Login);
         
         if (user is null) throw new UserNotFoundException();
@@ -61,7 +61,7 @@ public class AuthService : IAuthService
             ExpiresAt = DateTime.UtcNow.AddMinutes(minutes),
         };
         
-        await (_context.Sessions ?? throw new InvalidOperationException()).AddAsync(session);
+        await _context.Sessions.AddAsync(session);
         await _context.SaveChangesAsync();
 
         return session;
@@ -69,7 +69,7 @@ public class AuthService : IAuthService
 
     public async Task DeleteSessionAsync(string sessionId)
     {
-        var session = await (_context.Sessions ?? throw new InvalidOperationException())
+        var session = await _context.Sessions
             .FirstOrDefaultAsync(x => x.SessionId == new Guid(sessionId));
 
         if (session is null) throw new SessionNotFoundException();

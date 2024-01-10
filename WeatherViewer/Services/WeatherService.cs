@@ -69,22 +69,20 @@ public class WeatherService : IWeatherService
             Latitude = request.Lat,
             Longitude = request.Lon,
         };
-        await (_context.Locations ?? throw new InvalidOperationException())
-            .AddAsync(location);
-        
+        await _context.Locations.AddAsync(location);
         await _context.SaveChangesAsync();
     }
 
     public async Task DeleteLocationAsync(long locationId, long userId)
     {
         var location = await GetLocationAsync(userId, locationId);
-        (_context.Locations ?? throw new InvalidOperationException()).Remove(location);
+        _context.Locations.Remove(location!);
         await _context.SaveChangesAsync();
     }
 
     public async Task DeleteAllLocationsAsync(long userId)
     {
-        var locations = await (_context.Locations ?? throw new InvalidOperationException())
+        var locations = await _context.Locations
             .Where(location => location.UserId == userId)
             .ToListAsync();
         
@@ -200,12 +198,12 @@ public class WeatherService : IWeatherService
     }
     
     private async Task<IEnumerable<Location>> GetLocationsAsync(long userId) 
-        => await (_context.Locations ?? throw new InvalidOperationException())
+        => await _context.Locations
             .Where(location => location.UserId == userId)
             .ToListAsync();
     
     private async Task<Location?> GetLocationAsync(long userId, long locationId) =>
-        await (_context.Locations ?? throw new InvalidOperationException())
+        await _context.Locations
             .FirstOrDefaultAsync(l => l.LocationId == locationId && l.UserId == userId) 
         ?? throw new LocationNotFoundException();
 }

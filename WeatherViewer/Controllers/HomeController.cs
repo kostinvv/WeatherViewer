@@ -112,7 +112,7 @@ public class HomeController : Controller
             );
         
         // get user id from database
-        var userId = await (_context.Sessions ?? throw new InvalidOperationException())
+        var userId = await _context.Sessions
             .Where(s => s.SessionId == sessionId)
             .Select(s => s.UserId)
             .FirstAsync();
