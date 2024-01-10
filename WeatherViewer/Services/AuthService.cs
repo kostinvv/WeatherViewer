@@ -41,7 +41,7 @@ public class AuthService : IAuthService
         _logger.LogInformation("User successfully created.");
     }
 
-    public async Task<Session> AuthAsync(LoginRequestDto request)
+    public async Task<Session> CreateSessionAsync(LoginRequestDto request)
     {
         var user = await _context.Users
             .FirstOrDefaultAsync(user => user.Login == request.Login);
@@ -51,31 +51,17 @@ public class AuthService : IAuthService
         if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
             throw new InvalidPasswordException();
 
-        var minutes = double.Parse(_config["MaxAge"] ?? throw new InvalidOperationException());
+        var minutes = double.Parse(
+            _config["MaxAge"] ?? throw new InvalidOperationException());
         
         _logger.LogInformation("Creating session.");
         Session session = new ()
         {
-            SessionId = new Guid(),
+            SessionId = Guid.NewGuid(),
             UserId = user.UserId,
-            ExpiresAt = DateTime.UtcNow.AddMinutes(minutes),
+            AbsoluteExpireTime = TimeSpan.FromMinutes(minutes),
         };
-        
-        await _context.Sessions.AddAsync(session);
-        await _context.SaveChangesAsync();
 
         return session;
-    }
-
-    public async Task DeleteSessionAsync(string sessionId)
-    {
-        var session = await _context.Sessions
-            .FirstOrDefaultAsync(x => x.SessionId == new Guid(sessionId));
-
-        if (session is null) throw new SessionNotFoundException();
-        
-        _logger.LogInformation("Session deletion.");
-        _context.Sessions.Remove(session);
-        await _context.SaveChangesAsync();
     }
 }

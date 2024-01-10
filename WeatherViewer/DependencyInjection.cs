@@ -18,10 +18,6 @@ public static class DependencyInjection
         services.AddTransient<IAuthService, AuthService>();
         
         services.AddTransient<IWeatherService, WeatherService>();
-        
-        services.AddTransient<SessionService>();
-        
-        services.AddHostedService<SessionHostedService>();
     }
 
     /// <summary> Add database configuration. </summary>

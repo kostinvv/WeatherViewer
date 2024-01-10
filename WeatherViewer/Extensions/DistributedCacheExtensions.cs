@@ -1,6 +1,5 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
-using Newtonsoft.Json;
-using JsonSerializer = System.Text.Json.JsonSerializer;
+﻿using System.Text.Json;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace WeatherViewer.Extensions;
 
@@ -15,7 +14,7 @@ public static class DistributedCacheExtensions
     {
         var options = new DistributedCacheEntryOptions
         {
-            AbsoluteExpirationRelativeToNow = absoluteExpireTime ?? TimeSpan.FromMinutes(1),
+            AbsoluteExpirationRelativeToNow = absoluteExpireTime ?? TimeSpan.FromMinutes(60),
             SlidingExpiration = unusedExpireTime
         };
 
@@ -29,6 +28,6 @@ public static class DistributedCacheExtensions
     {
         var jsonString = await cache.GetStringAsync(key);
         
-        return jsonString is null ? default(T) : JsonSerializer.Deserialize<T>(jsonString);
+        return jsonString is null ? default : JsonSerializer.Deserialize<T>(jsonString);
     }
 }

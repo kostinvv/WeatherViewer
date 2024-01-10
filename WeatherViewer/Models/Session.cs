@@ -1,13 +1,8 @@
 ﻿namespace WeatherViewer.Models;
 
-public class Session
+public record Session
 {
-    public Guid SessionId { get; set; }
-    
-    // foreign key property 
-    public long UserId { get; set; }
-    // navigation property
-    public User User = null!;
-    
-    public DateTime ExpiresAt { get; set; }
+    public Guid SessionId { get; init; }
+    public long UserId { get; init; }
+    public TimeSpan AbsoluteExpireTime { get; init; }
 }

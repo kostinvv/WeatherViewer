@@ -1,21 +1,26 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using WeatherViewer.Exceptions.Auth;
 using WeatherViewer.Models.DTOs.Auth;
 using WeatherViewer.Services.Interfaces;
+using WeatherViewer.Extensions;
 
 namespace WeatherViewer.Controllers;
 
 public class UserController : Controller
 {
-    private const string CookieKey = "SessionId";
+    private const string CookieSessionId = "SessionId";
+    private const string CookieWeatherLogin = "weather_login";
     
     private readonly IAuthService _authService;
-    private readonly IConfiguration _config;
+    private readonly IDistributedCache _cache;
 
-    public UserController(IAuthService authService, IConfiguration config)
+    public UserController(
+        IAuthService authService, 
+        IDistributedCache cache)
     {
         _authService = authService;
-        _config = config;
+        _cache = cache;
     }
 
     [HttpGet]
@@ -32,7 +37,7 @@ public class UserController : Controller
             if (!ModelState.IsValid) return View();
             
             await _authService.CreateUserAsync(request);
-            return RedirectToAction("Login");
+            return RedirectToAction("login");
         }
         catch (UserExistsException ex)
         {
@@ -48,14 +53,19 @@ public class UserController : Controller
         {
             if (!ModelState.IsValid) return View();
             
-            var login = request.Login;
-            var session = await _authService.AuthAsync(request);
-            var minutes = double.Parse(_config["MaxAge"] ?? throw new InvalidOperationException());
-            Response.Cookies.Append(CookieKey, session.SessionId.ToString(), new CookieOptions()
-            {
-                MaxAge = TimeSpan.FromMinutes(minutes),
-            });
-            Response.Cookies.Append("weather_login", login);
+            var session = await _authService.CreateSessionAsync(request);
+            var sessionId = session.SessionId.ToString();
+            
+            await _cache.SetRecordAsync(
+                key: sessionId, 
+                data: session.UserId, 
+                absoluteExpireTime: session.AbsoluteExpireTime,
+                unusedExpireTime: TimeSpan.FromDays(3));
+            
+            Response.Cookies.Append(CookieSessionId, value: sessionId, 
+                new CookieOptions { MaxAge = session.AbsoluteExpireTime, });
+            Response.Cookies.Append(CookieWeatherLogin, request.Login, 
+                new CookieOptions { MaxAge = session.AbsoluteExpireTime, });
             
             return Redirect("/");
         }
@@ -71,19 +81,14 @@ public class UserController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> LogoutAsync()
+    public IActionResult Logout()
     {
-        try
-        {
-            if (!Request.Cookies.TryGetValue(CookieKey, out var sessionId))
-                return RedirectToAction("login", "user");
-            
-            Response.Cookies.Delete("weather_login");
-            Response.Cookies.Delete(CookieKey);
-            await _authService.DeleteSessionAsync(sessionId);
-        }
-        catch (SessionNotFoundException) { }
+        if (Request.Cookies.ContainsKey(CookieSessionId))
+            Response.Cookies.Delete(key:CookieSessionId);
         
+        if (Request.Cookies.ContainsKey(CookieWeatherLogin))
+            Response.Cookies.Delete(key:CookieWeatherLogin);
+
         return RedirectToAction("login", "user");
     }
 }

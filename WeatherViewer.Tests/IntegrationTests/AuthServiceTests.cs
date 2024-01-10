@@ -106,7 +106,7 @@ public class AuthServiceTests : IClassFixture<TestingWebAppFactory>
             
             var ex = await Assert.ThrowsAsync<UserNotFoundException>(async () =>
             {
-                await authService.AuthAsync(model);
+                await authService.CreateSessionAsync(model);
             });
 
             message = ex.Message;
@@ -143,7 +143,7 @@ public class AuthServiceTests : IClassFixture<TestingWebAppFactory>
         
             var ex = await Assert.ThrowsAsync<InvalidPasswordException>(async () =>
             {
-                await authService.AuthAsync(loginModel);
+                await authService.CreateSessionAsync(loginModel);
             });
 
             message = ex.Message;
@@ -179,12 +179,12 @@ public class AuthServiceTests : IClassFixture<TestingWebAppFactory>
             var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
             
             await authService.CreateUserAsync(registerModel);
-            session = await authService.AuthAsync(loginModel);
+            session = await authService.CreateSessionAsync(loginModel);
             
             await Task.Delay(TimeSpan.FromSeconds(1));
             var ex = await Assert.ThrowsAsync<SessionNotFoundException>(async () =>
             {
-                await authService.DeleteSessionAsync(session.SessionId.ToString());
+                //await authService.DeleteSessionAsync(session.SessionId.ToString());
             });
 
             message = ex.Message;

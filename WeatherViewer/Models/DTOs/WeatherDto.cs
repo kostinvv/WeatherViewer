@@ -8,6 +8,9 @@ public record WeatherDto
     /// <summary> City name. </summary>
     public required string Name { get; init; }
     
+    /// <summary> Weather station name. </summary>
+    public required string WeatherStation { get; init; }
+    
     /// <summary> Weather condition. </summary>
     public required string Description { get; init; }
     

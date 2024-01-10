@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using WeatherViewer.Data;
 using WeatherViewer.Exceptions;
+using WeatherViewer.Extensions;
 using WeatherViewer.Models;
 using WeatherViewer.Models.API;
 using WeatherViewer.Models.DTOs;
@@ -17,17 +19,21 @@ public class WeatherService : IWeatherService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<WeatherService> _logger;
     private readonly IConfiguration _config;
+    private readonly IDistributedCache _cache;
 
     public WeatherService(
         IHttpClientFactory httpClientFactory, 
         ApplicationDbContext context, 
         ILogger<WeatherService> logger, 
-        IConfiguration config)
+        IConfiguration config,
+        IDistributedCache cache
+        )
     {
         _httpClientFactory = httpClientFactory;
         _context = context;
         _logger = logger;
         _config = config;
+        _cache = cache;
     }
     
     public async Task<IEnumerable<ApiLocationResponse>> SearchLocationsAsync(string name)
@@ -61,16 +67,25 @@ public class WeatherService : IWeatherService
 
     public async Task AddLocationAsync(LocationDto request, long userId)
     {
-        // create location
-        Location location = new()
+        var location = await _context.Locations
+            .FirstOrDefaultAsync(location => 
+                location.UserId == userId 
+                && request.Lat == location.Latitude 
+                && request.Lon == location.Longitude);
+
+        if (location is null)
         {
-            UserId = userId,
-            Name = request.Name,
-            Latitude = request.Lat,
-            Longitude = request.Lon,
-        };
-        await _context.Locations.AddAsync(location);
-        await _context.SaveChangesAsync();
+            location = new Location
+            {
+                UserId = userId,
+                Name = request.Name,
+                Latitude = request.Lat,
+                Longitude = request.Lon,
+            };
+        
+            await _context.Locations.AddAsync(location);
+            await _context.SaveChangesAsync();
+        }
     }
 
     public async Task DeleteLocationAsync(long locationId, long userId)
@@ -93,7 +108,16 @@ public class WeatherService : IWeatherService
 
     public async Task<IEnumerable<ForecastDto>> GetWeatherForecastsAsync(long locationId, long userId)
     {
-        var response = await GetForecastResponseAsync(locationId, userId);
+        var location = await GetLocationAsync(userId, locationId);
+
+        var key = $"Forecast_{location.Name}_{location.Longitude}_{location.Latitude}";
+        var response = await _cache.GetRecordAsync<ApiForecastResponse>(key);
+
+        if (response is null)
+        {
+            response = await GetForecastResponseAsync(location);
+            await _cache.SetRecordAsync(key, response);
+        }
         var forecast = response.Forecasts.Select(value => new ForecastDto
             {
                 Icon = value.Weather[0].Icon,
@@ -108,16 +132,25 @@ public class WeatherService : IWeatherService
     public async Task<IEnumerable<WeatherDto>> GetWeatherAsync(long userId)
     {
         var weather = new List<WeatherDto>();
-        
+
         // get user locations
         var locations = await GetLocationsAsync(userId);
         foreach (var location in locations)
         {
-            var response = await GetWeatherForLocationAsync(location);
-            weather.Add(new WeatherDto()
+            var key = $"{location.Name}_{location.Longitude}_{location.Latitude}";
+            var response = await _cache.GetRecordAsync<ApiWeatherResponse>(key);
+            
+            if (response is null)
+            {
+                response = await GetWeatherForLocationAsync(location);
+                await _cache.SetRecordAsync(key, response);
+            }
+            
+            weather.Add(new WeatherDto
             {
                 Id = location.LocationId,
-                Name = response.Name,
+                Name = location.Name,
+                WeatherStation = response.Name,
                 Country = response.Sys.Country,
                 Temp = response.Main.Temp,
                 TempMin = response.Main.TempMin,
@@ -164,11 +197,10 @@ public class WeatherService : IWeatherService
         }
     }
     
-    private async Task<ApiForecastResponse> GetForecastResponseAsync(long locationId, long userId)
+    private async Task<ApiForecastResponse> GetForecastResponseAsync(Location location)
     {
         try
         {
-            var location = await GetLocationAsync(userId, locationId);
             var apiKey = _config["Weather:ServiceApiKey"];
             
             var uriBuilder = new UriBuilder

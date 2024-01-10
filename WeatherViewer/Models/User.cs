@@ -8,5 +8,4 @@ public class User
     public string Password { get; set; } = string.Empty;
     
     public ICollection<Location> Locations { get; } = new List<Location>();
-    public ICollection<Session> Sessions { get; } = new List<Session>();
 }
