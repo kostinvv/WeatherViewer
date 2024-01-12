@@ -1,0 +1,47 @@
+﻿networks:
+  network:
+    driver: bridge
+services:
+  app:
+    image: weatherviewer
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports: 
+    - "8080:80"
+    networks:
+    - network
+    command: ["dotnet", "ef", "database update"]
+    depends_on: 
+    - postgres_db
+    - redis
+  postgres_db:
+    container_name: postgres
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1
+      POSTGRES_DB: weather_viewer
+    ports:
+    - "5432:5432"
+    networks: 
+    - network
+    volumes:
+    - postgres-data:/var/lib/postgresql/data
+  redis:
+    image: redis
+    ports:
+      - "5002:5002"
+    networks: 
+    - network
+    volumes:
+    - redis-data:/var/lib/redis
+  adminer:
+    image: adminer:latest
+    ports:
+      - "9000:8080"
+    networks:
+      - network
+volumes: 
+  redis-data:
+  postgres-data: 
