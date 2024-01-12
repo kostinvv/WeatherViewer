@@ -4,6 +4,8 @@
 services:
   app:
     image: weatherviewer
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
     build:
       context: .
       dockerfile: Dockerfile
