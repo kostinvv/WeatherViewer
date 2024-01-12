@@ -40,7 +40,7 @@ public class WeatherService : IWeatherService
     {
         try
         {
-            var apiKey = _config["Weather:ServiceApiKey"];
+            var apiKey = _config["ApiKey"];
             var uriBuilder = new UriBuilder
             {
                 Scheme = "http",
@@ -170,7 +170,7 @@ public class WeatherService : IWeatherService
     {
         try
         {
-            var apiKey = _config["Weather:ServiceApiKey"];
+            var apiKey = _config["ApiKey"];
             var uriBuilder = new UriBuilder
             {
                 Scheme = "http",
@@ -201,7 +201,7 @@ public class WeatherService : IWeatherService
     {
         try
         {
-            var apiKey = _config["Weather:ServiceApiKey"];
+            var apiKey = _config["ApiKey"];
             
             var uriBuilder = new UriBuilder
             {
