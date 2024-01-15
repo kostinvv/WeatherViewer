@@ -34,7 +34,6 @@ public class AuthService : IAuthService
         await _context.Users.AddAsync(new User
         {
             Login = request.Login,
-            Email = request.Email,
             Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
         });
         await _context.SaveChangesAsync();

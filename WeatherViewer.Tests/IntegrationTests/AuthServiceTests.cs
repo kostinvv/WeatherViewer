@@ -24,7 +24,6 @@ public class AuthServiceTests : IClassFixture<TestingWebAppFactory>
         // Arrange
         var model = new RegisterRequestDto()
         {
-            Email = "test@mail.ru",
             Login = "User",
             Password = "testpass",
         };
@@ -54,7 +53,6 @@ public class AuthServiceTests : IClassFixture<TestingWebAppFactory>
         // Arrange
         var model = new RegisterRequestDto()
         {
-            Email = "test@mail.ru",
             Login = "UserTest",
             Password = "testpass",
         };
@@ -69,7 +67,6 @@ public class AuthServiceTests : IClassFixture<TestingWebAppFactory>
             if (context.Users != null)
                 await context.Users.AddAsync(new User()
                 {
-                    Email = "test@mail.ru",
                     Login = "UserTest",
                     Password = BCrypt.Net.BCrypt.HashPassword("testpass"),
                 });
@@ -130,7 +127,6 @@ public class AuthServiceTests : IClassFixture<TestingWebAppFactory>
         {
             Login = "test_user",
             Password = "testpass1",
-            Email = "test@mail.ru",
         };
 
         string message;
@@ -167,7 +163,6 @@ public class AuthServiceTests : IClassFixture<TestingWebAppFactory>
         {
             Login = "Test",
             Password = "Pass",
-            Email = "test@mail.ru",
         };
 
         Session session;

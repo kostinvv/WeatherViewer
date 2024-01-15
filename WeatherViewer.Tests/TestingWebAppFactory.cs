@@ -49,7 +49,6 @@ public class TestingWebAppFactory : WebApplicationFactory<Program>
             context.Add(new User()
             {
                 Login = "user_test_login", 
-                Email = "test@mail.ru",
                 Password = BCrypt.Net.BCrypt.HashPassword("TestPassword123"),
             });
             context.SaveChanges();

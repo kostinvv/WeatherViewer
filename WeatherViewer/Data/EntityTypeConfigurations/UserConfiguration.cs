@@ -17,9 +17,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(property => property.Login)
             .HasColumnName("login");
         
-        builder.Property(property => property.Email)
-            .HasColumnName("email");
-        
         builder.Property(property => property.Password)
             .HasColumnName("password");
     }
