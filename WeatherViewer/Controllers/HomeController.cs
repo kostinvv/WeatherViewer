@@ -51,18 +51,10 @@ public class HomeController : Controller
     [HttpGet("delete/{locationId:long}")]
     public async Task<IActionResult> DeleteLocationAsync(long locationId)
     {
-        try
-        {
-            var userId = await GetUserIdAsync();
-            await _service.DeleteLocationAsync(locationId, userId);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
+        var userId = await GetUserIdAsync();
+        await _service.DeleteLocationAsync(locationId, userId);
         
-        return View("index");
+        return RedirectToAction("index", "home");
     }
     
     [Auth]
