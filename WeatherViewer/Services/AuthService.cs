@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using WeatherViewer.Data;
 using WeatherViewer.Exceptions.Auth;
 using WeatherViewer.Models;
@@ -25,19 +26,22 @@ public class AuthService : IAuthService
 
     public async Task CreateUserAsync(RegisterRequestDto request)
     {
-        var foundUser = await _context.Users
-            .FirstOrDefaultAsync(user => user.Login == request.Login);
-        
-        if (foundUser is not null) throw new UserExistsException();
-        
-        _logger.LogInformation("Creating user.");
-        await _context.Users.AddAsync(new User
+        try
         {
-            Login = request.Login,
-            Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
-        });
-        await _context.SaveChangesAsync();
-        _logger.LogInformation("User successfully created.");
+            _logger.LogInformation("Creating user.");
+            await _context.Users.AddAsync(new User
+            {
+                Login = request.Login,
+                Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
+            });
+            await _context.SaveChangesAsync();
+            _logger.LogInformation("User successfully created.");
+        }
+        catch (DbUpdateException dbUpdateEx)
+        {
+            _logger.LogError(dbUpdateEx.Message);
+            throw new UserExistsException();
+        }
     }
 
     public async Task<Session> CreateSessionAsync(LoginRequestDto request)
