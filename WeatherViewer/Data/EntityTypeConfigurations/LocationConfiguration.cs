@@ -11,6 +11,8 @@ public class LocationConfiguration : IEntityTypeConfiguration<Location>
         builder.ToTable("locations").HasKey(location => location.LocationId);
         builder.HasIndex(location => location.LocationId).IsUnique();
         
+        builder.HasIndex(location => new { location.UserId, location.LocationId });
+        
         builder.Property(property => property.LocationId)
             .HasColumnName("location_id");
         
