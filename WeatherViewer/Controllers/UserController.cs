@@ -22,11 +22,9 @@ public class UserController : Controller
         _authService = authService;
         _cache = cache;
     }
-
-    [HttpGet]
+    
     public IActionResult Login() => View();
-
-    [HttpGet]
+    
     public IActionResult Register() => View();
 
     [HttpPost]
@@ -34,16 +32,18 @@ public class UserController : Controller
     {
         try
         {
-            if (!ModelState.IsValid) return View();
+            if (!ModelState.IsValid)
+                return View();
             
             await _authService.CreateUserAsync(request);
-            return RedirectToAction("login");
+            return View("login");
         }
-        catch (UserExistsException ex)
+        catch (UserExistsException userExistsEx)
         {
-            ModelState.AddModelError(string.Empty, ex.Message);
-            return View();
+            ModelState.AddModelError("", userExistsEx.Message);
         }
+        
+        return View();
     }
 
     [HttpPost]
@@ -51,7 +51,8 @@ public class UserController : Controller
     {
         try
         {
-            if (!ModelState.IsValid) return View();
+            if (!ModelState.IsValid)
+                return View();
             
             var session = await _authService.CreateSessionAsync(request);
             var sessionId = session.SessionId.ToString();
@@ -64,31 +65,37 @@ public class UserController : Controller
             
             Response.Cookies.Append(CookieSessionId, value: sessionId, 
                 new CookieOptions { MaxAge = session.AbsoluteExpireTime, });
+            
             Response.Cookies.Append(CookieWeatherLogin, request.Login, 
                 new CookieOptions { MaxAge = session.AbsoluteExpireTime, });
             
-            return Redirect("/");
+            return RedirectToAction("index", "home");
         }
-        catch (UserNotFoundException ex)
+        catch (UserNotFoundException userNotFoundEx)
         {
-            ModelState.AddModelError(string.Empty, ex.Message);
+            ModelState.AddModelError("", userNotFoundEx.Message);
         }
-        catch (InvalidPasswordException ex)
+        catch (InvalidPasswordException invalidPasswordEx)
         {
-            ModelState.AddModelError(string.Empty, ex.Message);
+            ModelState.AddModelError("", invalidPasswordEx.Message);
         }
+        
         return View();
     }
 
-    [HttpGet]
+    [HttpGet("logout")]
     public IActionResult Logout()
     {
         if (Request.Cookies.ContainsKey(CookieSessionId))
-            Response.Cookies.Delete(key:CookieSessionId);
-        
-        if (Request.Cookies.ContainsKey(CookieWeatherLogin))
-            Response.Cookies.Delete(key:CookieWeatherLogin);
+        {
+            Response.Cookies.Delete(key: CookieSessionId);   
+        }
 
-        return RedirectToAction("login", "user");
+        if (Request.Cookies.ContainsKey(CookieWeatherLogin))
+        {
+            Response.Cookies.Delete(key: CookieWeatherLogin);   
+        }
+
+        return View("login");
     }
 }
