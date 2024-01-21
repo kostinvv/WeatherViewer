@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using WeatherViewer.Data.EntityTypeConfigurations;
+﻿using System.Reflection;
+using Microsoft.EntityFrameworkCore;
 using WeatherViewer.Models;
 
 namespace WeatherViewer.Data;
@@ -13,8 +13,7 @@ public class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfiguration(new UserConfiguration());
-        modelBuilder.ApplyConfiguration(new LocationConfiguration());
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         
         base.OnModelCreating(modelBuilder);
     }
