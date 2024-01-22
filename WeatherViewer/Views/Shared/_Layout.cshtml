@@ -1,8 +1,5 @@
-﻿@{
-    var isLoggedIn = Context.Request.Cookies.ContainsKey("SessionId");
-    var userName = Context.Request.Cookies.FirstOrDefault(cookie 
-        => cookie.Key == "weather_login").Value ?? "";
-}
+﻿@using WeatherViewer.Services.Interfaces
+@inject IAuthService AuthService
 
 <!DOCTYPE html>
 <html lang="en">
@@ -10,8 +7,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@ViewData["Title"]</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/main.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="~/css/main.css"/>
 </head>
 <body>
 <nav class="navbar navbar-expand-md bg-body-tertiary py-3">
@@ -25,31 +22,28 @@
         </button>
         <div class="collapse navbar-collapse" id="navcol-3">
             <ul class="navbar-nav me-auto">
-                @if (isLoggedIn)
+                @if (await AuthService.ValidateSessionId(Context.Request.Cookies["SessionId"]!))
                 {
+                    var username = Context.Request.Cookies["weather_login"] ?? "";
+
                     <li class="nav-item">
-                        <a class="nav-link active border-bottom border-2">Hello, @userName</a>
+                        <a class="nav-link active border-bottom border-2">Hello, @username</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="home" asp-action="index">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="user" asp-action="logout">Log out</a>
                     </li>
                 }
-                @{
-                    if (!isLoggedIn)
-                    {
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="user" asp-action="login">Log in</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="user" asp-action="register">Sign up</a>
-                        </li>
-                    }
-                    else
-                    {
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="home" asp-action="index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="user" asp-action="logout">Log out</a>
-                        </li>
-                    }
+                else
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="user" asp-action="login">Log in</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="user" asp-action="register">Sign up</a>
+                    </li>
                 }
             </ul>
             <a class="btn btn-outline-primary" href="https://t.me/kostin_vv">Propose corrections</a>

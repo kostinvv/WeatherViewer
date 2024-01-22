@@ -8,4 +8,6 @@ public interface IAuthService
     public Task CreateUserAsync(RegisterRequestDto request);
     
     public Task<Session> CreateSessionAsync(LoginRequestDto request);
+
+    public Task<bool> ValidateSessionId(string sessionId);
 }

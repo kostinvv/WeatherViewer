@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Npgsql;
+using Microsoft.Extensions.Caching.Distributed;
 using WeatherViewer.Data;
 using WeatherViewer.Exceptions.Auth;
+using WeatherViewer.Extensions;
 using WeatherViewer.Models;
 using WeatherViewer.Models.DTOs.Auth;
 using WeatherViewer.Services.Interfaces;
@@ -13,35 +14,37 @@ public class AuthService : IAuthService
     private readonly ApplicationDbContext _context;
     private readonly ILogger<AuthService> _logger;
     private readonly IConfiguration _config;
+    private readonly IDistributedCache _cache;
 
     public AuthService(
         ApplicationDbContext context, 
         ILogger<AuthService> logger, 
-        IConfiguration config)
+        IConfiguration config,
+        IDistributedCache cache)
     {
         _context = context;
         _logger = logger;
         _config = config;
+        _cache = cache;
     }
 
     public async Task CreateUserAsync(RegisterRequestDto request)
     {
-        try
+        var foundUser = await _context.Users.FirstOrDefaultAsync(user => user.Login == request.Login);
+
+        if (foundUser is not null)
         {
-            _logger.LogInformation("Creating user.");
-            await _context.Users.AddAsync(new User
-            {
-                Login = request.Login,
-                Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
-            });
-            await _context.SaveChangesAsync();
-            _logger.LogInformation("User successfully created.");
-        }
-        catch (DbUpdateException dbUpdateEx)
-        {
-            _logger.LogError(dbUpdateEx.Message);
             throw new UserExistsException();
         }
+        
+        await _context.Users.AddAsync(new User
+        {
+            Login = request.Login,
+            Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
+        });
+        await _context.SaveChangesAsync();
+        
+        _logger.LogInformation("User successfully created.");
     }
 
     public async Task<Session> CreateSessionAsync(LoginRequestDto request)
@@ -66,5 +69,17 @@ public class AuthService : IAuthService
         };
 
         return session;
+    }
+
+    public async Task<bool> ValidateSessionId(string sessionId)
+    {
+        if (string.IsNullOrEmpty(sessionId))
+        {
+            return false;
+        }
+
+        var redisResult = await _cache.GetRecordAsync<long>(sessionId);
+
+        return redisResult != default;
     }
 }
