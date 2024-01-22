@@ -28,7 +28,7 @@ public class UserController : Controller
     public IActionResult Register() => View();
 
     [HttpPost]
-    public async Task<IActionResult> RegisterAsync([FromForm]RegisterRequestDto request)
+    public async Task<IActionResult> RegisterAsync([FromForm] RegisterRequestDto request)
     {
         try
         {
@@ -36,7 +36,7 @@ public class UserController : Controller
                 return View();
             
             await _authService.CreateUserAsync(request);
-            return View("login");
+            return RedirectToAction("login", "user");
         }
         catch (UserExistsException userExistsEx)
         {
@@ -47,7 +47,7 @@ public class UserController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> LoginAsync(LoginRequestDto request)
+    public async Task<IActionResult> LoginAsync([FromForm] LoginRequestDto request)
     {
         try
         {
@@ -96,6 +96,6 @@ public class UserController : Controller
             Response.Cookies.Delete(key: CookieWeatherLogin);   
         }
 
-        return View("login");
+        return RedirectToAction("login", "user");
     }
 }
