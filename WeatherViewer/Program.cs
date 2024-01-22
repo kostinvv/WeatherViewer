@@ -13,7 +13,7 @@ public class Program
         builder.Services.AddDatabase(configuration: builder.Configuration);
         
         var app = builder.Build();
-
+        
         if (!app.Environment.IsDevelopment())
         {
             app.UseExceptionHandler("/Home/Error");
@@ -29,10 +29,7 @@ public class Program
         {
             var services = scope.ServiceProvider;
             var context = services.GetRequiredService<ApplicationDbContext>();
-            if (context.Database.GetPendingMigrations().Any())
-            {
-                context.Database.Migrate();
-            }
+            context.Database.EnsureCreated();
         }
         
         app.Run();

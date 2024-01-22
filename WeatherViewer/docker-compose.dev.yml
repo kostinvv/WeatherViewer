@@ -1,0 +1,18 @@
+﻿version: '3.3'
+
+services:
+  
+  database:
+    container_name: postgres
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1
+      POSTGRES_DB: weather_viewer
+    ports:
+      - "5432:5432"
+    
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
