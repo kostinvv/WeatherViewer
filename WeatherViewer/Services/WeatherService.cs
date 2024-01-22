@@ -16,20 +16,20 @@ public class WeatherService : IWeatherService
     private const int Limit = 5;
     
     private readonly ApplicationDbContext _context;
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly HttpClient _httpClient;
     private readonly ILogger<WeatherService> _logger;
     private readonly IConfiguration _config;
     private readonly IDistributedCache _cache;
 
     public WeatherService(
-        IHttpClientFactory httpClientFactory, 
+        HttpClient httpClient, 
         ApplicationDbContext context, 
         ILogger<WeatherService> logger, 
         IConfiguration config,
         IDistributedCache cache
         )
     {
-        _httpClientFactory = httpClientFactory;
+        _httpClient = httpClient;
         _context = context;
         _logger = logger;
         _config = config;
@@ -51,8 +51,7 @@ public class WeatherService : IWeatherService
                         $"&limit={Limit}",
             };
             var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
-            var httpClient = _httpClientFactory.CreateClient();
-            var response = await httpClient.SendAsync(request);
+            var response = await _httpClient.SendAsync(request);
             var jsonString = await response.Content.ReadAsStringAsync();
             var foundLocations = Newtonsoft.Json.JsonConvert
                 .DeserializeObject<IEnumerable<ApiLocationResponse>>(jsonString);
@@ -182,8 +181,7 @@ public class WeatherService : IWeatherService
                         $"&units=metric",
             };
             var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
-            var httpClient = _httpClientFactory.CreateClient();
-            var response = await httpClient.SendAsync(request);
+            var response = await _httpClient.SendAsync(request);
             
             var jsonString = await response.Content.ReadAsStringAsync();
             var weather = Newtonsoft.Json.JsonConvert
@@ -214,8 +212,7 @@ public class WeatherService : IWeatherService
                         $"&units=metric",
             };
             var request = new HttpRequestMessage(HttpMethod.Get, uriBuilder.Uri);
-            var httpClient = _httpClientFactory.CreateClient();
-            var response = await httpClient.SendAsync(request);
+            var response = await _httpClient.SendAsync(request);
             var jsonString = await response.Content.ReadAsStringAsync();
             var forecast = Newtonsoft.Json.JsonConvert
                 .DeserializeObject<ApiForecastResponse>(jsonString);
