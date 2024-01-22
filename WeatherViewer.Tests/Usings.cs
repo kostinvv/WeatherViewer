@@ -1,0 +1,12 @@
+﻿global using Microsoft.AspNetCore.Mvc.Testing;
+global using Xunit;
+global using Microsoft.AspNetCore.Hosting;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.DependencyInjection;
+global using WeatherViewer.Data;
+global using WeatherViewer.Models;
+global using System.Net;
+global using RichardSzalay.MockHttp;
+global using WeatherViewer.Exceptions;
+global using WeatherViewer.Services.Interfaces;
+global using Microsoft.AspNetCore.TestHost;
