@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
-using WeatherViewer.Models.DTOs;
-using WeatherViewer.Services.Interfaces;
+using WeatherViewer.Exceptions.Auth;
 using WeatherViewer.Extensions;
 using WeatherViewer.Filters;
-
+using WeatherViewer.Models.DTOs;
+using WeatherViewer.Services.Interfaces;
 namespace WeatherViewer.Controllers;
 
 public class HomeController : Controller
@@ -24,20 +24,20 @@ public class HomeController : Controller
     
     public IActionResult Error() => View();
     
-    [Auth]
     [HttpGet]
+    [SessionException]
     public async Task<IActionResult> IndexAsync()
     {
         var userId = await GetUserIdAsync();
         var weather = await _service.GetWeatherAsync(userId);
-        
         return View(weather);
     }
     
-    [Auth]
     [HttpPost("locations")]
+    [SessionException]
     public async Task<IActionResult> GetLocationsAsync([FromForm] string name)
     {
+        await GetUserIdAsync();
         if (!ModelState.IsValid)
             return RedirectToAction("index", "home");
         
@@ -46,9 +46,9 @@ public class HomeController : Controller
         var foundLocations = await _service.SearchLocationsAsync(name);
         return View(foundLocations);
     }
-
-    [Auth]
+    
     [HttpGet("delete/{locationId:long}")]
+    [SessionException]
     public async Task<IActionResult> DeleteLocationAsync(long locationId)
     {
         var userId = await GetUserIdAsync();
@@ -57,8 +57,8 @@ public class HomeController : Controller
         return RedirectToAction("index", "home");
     }
     
-    [Auth]
     [HttpGet("delete_all")]
+    [SessionException]
     public async Task<IActionResult> DeleteAllLocationAsync()
     {
         var userId = await GetUserIdAsync();
@@ -66,9 +66,9 @@ public class HomeController : Controller
         
         return RedirectToAction("index", "home");
     }
-
-    [Auth]
+    
     [HttpPost]
+    [SessionException]
     public async Task<IActionResult> AddLocationAsync([FromForm] LocationDto request)
     {
         var userId = await GetUserIdAsync();
@@ -76,22 +76,36 @@ public class HomeController : Controller
         
         return RedirectToAction("index", "home");
     }
-
-    [Auth]
+    
     [HttpGet("forecast/{id:long}")]
+    [SessionException]
     public async Task<IActionResult> GetForecastAsync(long id)
     {
         var userId = await GetUserIdAsync();
         var forecast = await _service.GetWeatherForecastsAsync(locationId:id, userId);
-        
         return View(forecast);
     }
-
+    
     private async Task<long> GetUserIdAsync()
     {
-        var sessionId = Request.Cookies.First(cookie =>
-                cookie.Key == "SessionId").Value;
-        
-        return await _cache.GetRecordAsync<long>(key: sessionId);
+        try
+        {
+            var cookie = Request.Cookies.First(cookie => 
+                        cookie.Key == "SessionId");
+            
+            var userId = await _cache.GetRecordAsync<long>(key: cookie.Value);
+
+            if (userId == default)
+            {
+                Response.Cookies.Delete(cookie.Key);
+                throw new SessionNotFoundException();
+            }
+
+            return userId;
+        }
+        catch (InvalidOperationException)
+        {
+            throw new CookieNotFoundException();
+        }
     }
 }
